@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, reactive, ref } from "vue";
 
 const settings = reactive({
   targetFormat: "webp",
-  quality: 82,
+  quality: 90,
   width: "",
   height: "",
   keepExif: false,
@@ -330,40 +330,6 @@ onBeforeUnmount(() => {
         </section>
       </section>
 
-      <section id="features" class="content-section">
-        <h2>为什么选择 PhotoChanger？</h2>
-        <p class="section-intro">
-          一个适合日常和批量图片处理场景的在线转换工具，页面简洁，操作直接，覆盖常见图片格式转换需求。
-        </p>
-
-        <div class="feature-grid">
-          <article>
-            <h3>批量转换</h3>
-            <p>一次上传多个文件，统一设置输出格式、质量与尺寸，减少重复操作。</p>
-          </article>
-          <article>
-            <h3>多格式输出</h3>
-            <p>支持输出 JPG、PNG、WebP、GIF，适合网页压缩、社媒发布和日常兼容需求。</p>
-          </article>
-          <article>
-            <h3>HEIC 兼容</h3>
-            <p>支持 HEIC 与 HEIF 文件导入，便于处理苹果设备拍摄的照片。</p>
-          </article>
-          <article>
-            <h3>结果集中下载</h3>
-            <p>支持单文件下载，也支持转换完成后自动生成 ZIP 批量包。</p>
-          </article>
-          <article>
-            <h3>参数更可控</h3>
-            <p>可设置输出质量、宽高尺寸与 EXIF 保留策略，满足更细的导出要求。</p>
-          </article>
-          <article>
-            <h3>无需注册</h3>
-            <p>打开页面即可开始使用，适合快速处理临时图片任务。</p>
-          </article>
-        </div>
-      </section>
-
       <section v-if="queue.length > 0" class="content-section">
         <h2>转换队列与结果</h2>
         <p class="section-intro">
@@ -406,6 +372,40 @@ onBeforeUnmount(() => {
             <a v-if="item.resultUrl" class="ghost-btn inline-btn" :href="item.resultUrl" :download="item.downloadName">
               下载
             </a>
+          </article>
+        </div>
+      </section>
+
+      <section id="features" class="content-section">
+        <h2>为什么选择 PhotoChanger？</h2>
+        <p class="section-intro">
+          一个适合日常和批量图片处理场景的在线转换工具，页面简洁，操作直接，覆盖常见图片格式转换需求。
+        </p>
+
+        <div class="feature-grid">
+          <article>
+            <h3>批量转换</h3>
+            <p>一次上传多个文件，统一设置输出格式、质量与尺寸，减少重复操作。</p>
+          </article>
+          <article>
+            <h3>多格式输出</h3>
+            <p>支持输出 JPG、PNG、WebP、GIF，适合网页压缩、社媒发布和日常兼容需求。</p>
+          </article>
+          <article>
+            <h3>HEIC 兼容</h3>
+            <p>支持 HEIC 与 HEIF 文件导入，便于处理苹果设备拍摄的照片。</p>
+          </article>
+          <article>
+            <h3>结果集中下载</h3>
+            <p>支持单文件下载，也支持转换完成后自动生成 ZIP 批量包。</p>
+          </article>
+          <article>
+            <h3>参数更可控</h3>
+            <p>可设置输出质量、宽高尺寸与 EXIF 保留策略，满足更细的导出要求。</p>
+          </article>
+          <article>
+            <h3>无需注册</h3>
+            <p>打开页面即可开始使用，适合快速处理临时图片任务。</p>
           </article>
         </div>
       </section>
