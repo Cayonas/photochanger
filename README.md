@@ -2,9 +2,9 @@
 
 基于 `FastAPI + Vue 3 + Pillow` 的在线图片格式转换工具，支持单图转换、批量处理、ZIP 打包下载，以及 HEIC/HEIF 图片导入。
 
-## 系统功能
+## 目前版本功能
 
-- 支持上传格式：`JPEG`、`JPG`、`PNG`、`WebP`、`GIF`、`HEIC`、`HEIF`
+- 支持上传格式：`JPEG`、`JPG`、`PNG`、`WebP`、`HEIC`
 - 支持输出格式：`JPEG`、`PNG`、`WebP`、`GIF`
 - 支持质量调节
 - 支持按宽度或高度缩放
