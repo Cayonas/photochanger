@@ -1,92 +1,12 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PhotoChanger</title>
-  <link rel="stylesheet" href="/assets/styles.css">
-</head>
-<body>
-  <main class="page">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">PhotoChanger MVP</p>
-        <h1>在线图片格式转换工具</h1>
-        <p class="subtitle">先交付最关键的主流程：上传、设置、转换、预览和下载。</p>
-      </div>
-      <div class="status-card">
-        <p>当前支持</p>
-        <strong>JPEG / PNG / WebP / GIF</strong>
-        <span>单文件 50MB 以内</span>
-      </div>
-    </section>
-
-    <section class="workspace">
-      <form id="convert-form" class="panel">
-        <div id="dropzone" class="dropzone">
-          <input id="file-input" name="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
-          <p class="dropzone-title">拖拽图片到这里</p>
-          <p class="dropzone-hint">或点击选择文件</p>
-        </div>
-
-        <div class="field-grid">
-          <label>
-            <span>输出格式</span>
-            <select id="target-format" name="target_format">
-              <option value="webp">WebP</option>
-              <option value="jpeg">JPEG</option>
-              <option value="png">PNG</option>
-              <option value="gif">GIF</option>
-            </select>
-          </label>
-
-          <label>
-            <span>质量</span>
-            <input id="quality" name="quality" type="range" min="1" max="100" value="82">
-            <strong id="quality-value">82</strong>
-          </label>
-
-          <label>
-            <span>宽度</span>
-            <input id="width" name="width" type="number" min="1" placeholder="保持原始">
-          </label>
-
-          <label>
-            <span>高度</span>
-            <input id="height" name="height" type="number" min="1" placeholder="保持原始">
-          </label>
-        </div>
-
-        <label class="checkbox">
-          <input id="keep-exif" name="keep_exif" type="checkbox">
-          <span>保留 EXIF 元数据</span>
-        </label>
-
-        <button id="submit-button" type="submit">开始转换</button>
-      </form>
-
-      <section class="panel result-panel">
-        <div class="preview-grid">
-          <div>
-            <h2>原图预览</h2>
-            <img id="original-preview" class="preview-image" alt="原图预览">
-            <p id="original-meta" class="meta">未选择文件</p>
-          </div>
-          <div>
-            <h2>结果预览</h2>
-            <img id="result-preview" class="preview-image" alt="结果预览">
-            <p id="result-meta" class="meta">等待转换</p>
-          </div>
-        </div>
-
-        <div class="actions">
-          <a id="download-link" class="download-link disabled" href="#" download>下载结果</a>
-          <p id="message" class="message">准备就绪</p>
-        </div>
-      </section>
-    </section>
-  </main>
-
-  <script src="/assets/app.js"></script>
-</body>
-</html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoChanger</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+  </html>

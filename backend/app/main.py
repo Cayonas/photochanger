@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,9 +13,11 @@ from fastapi.staticfiles import StaticFiles
 from .services.converter import ConversionError, ConversionOptions, convert_image, validate_upload
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-FRONTEND_DIR = BASE_DIR / "frontend"
+FRONTEND_DIR = BASE_DIR / "frontend" / "dist"
 RESULTS_DIR = BASE_DIR / "backend" / "storage" / "results"
+BATCHES_DIR = BASE_DIR / "backend" / "storage" / "batches"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+BATCHES_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="PhotoChanger API", version="0.1.0")
 app.add_middleware(
@@ -26,6 +29,7 @@ app.add_middleware(
 )
 
 tasks: dict[str, dict[str, Any]] = {}
+batches: dict[str, dict[str, Any]] = {}
 
 
 @app.get("/api/health")
@@ -81,10 +85,48 @@ async def create_conversion(
         "original_height": result.original_height,
         "output_width": result.output_width,
         "output_height": result.output_height,
+        "content_type": f"image/{result.output_format}",
         "output_path": str(output_path),
     }
     tasks[task_id] = task_data
     return task_data
+
+
+@app.post("/api/v1/batches")
+def create_batch_archive(payload: dict[str, list[str]]) -> dict[str, Any]:
+    task_ids = payload.get("task_ids", [])
+    if not task_ids:
+        raise HTTPException(status_code=400, detail="请至少提供一个任务 ID。")
+
+    selected_tasks = []
+    for task_id in task_ids:
+        task = tasks.get(task_id)
+        if not task or task.get("status") != "completed":
+            raise HTTPException(status_code=400, detail=f"任务 {task_id} 不存在或尚未完成。")
+        selected_tasks.append(task)
+
+    batch_id = str(uuid4())
+    zip_path = BATCHES_DIR / f"{batch_id}.zip"
+
+    with ZipFile(zip_path, "w", compression=ZIP_DEFLATED) as archive:
+        for index, task in enumerate(selected_tasks, start=1):
+            source_path = Path(task["output_path"])
+            if not source_path.exists():
+                continue
+            suffix = source_path.suffix
+            stem = Path(task.get("filename") or f"file-{index}").stem
+            archive.writestr(f"{index:02d}-{stem}{suffix}", source_path.read_bytes())
+
+    batch_record = {
+        "batch_id": batch_id,
+        "status": "completed",
+        "task_ids": task_ids,
+        "file_count": len(selected_tasks),
+        "download_url": f"/api/v1/batches/{batch_id}/result",
+        "output_path": str(zip_path),
+    }
+    batches[batch_id] = batch_record
+    return {key: value for key, value in batch_record.items() if key != "output_path"}
 
 
 @app.get("/api/v1/tasks/{task_id}")
@@ -110,5 +152,26 @@ def download_result(task_id: str) -> FileResponse:
     download_name = f"{stem}-converted{suffix}"
     return FileResponse(path=output_path, filename=download_name)
 
+@app.get("/api/v1/batches/{batch_id}")
+def get_batch(batch_id: str) -> dict[str, Any]:
+    batch = batches.get(batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="批次不存在。")
+    return {key: value for key, value in batch.items() if key != "output_path"}
 
-app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+
+@app.get("/api/v1/batches/{batch_id}/result")
+def download_batch(batch_id: str) -> FileResponse:
+    batch = batches.get(batch_id)
+    if not batch or batch.get("status") != "completed":
+        raise HTTPException(status_code=404, detail="批次结果不存在。")
+
+    output_path = Path(batch["output_path"])
+    if not output_path.exists():
+        raise HTTPException(status_code=404, detail="批次文件已丢失。")
+
+    return FileResponse(path=output_path, filename=f"photochanger-batch-{batch_id}.zip")
+
+
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

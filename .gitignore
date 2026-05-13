@@ -1,7 +1,12 @@
 .venv/
 __pycache__/
 *.pyc
+frontend/node_modules/
+frontend/.npm-cache/
+frontend/dist/
 backend/storage/results/*
 backend/storage/uploads/*
+backend/storage/batches/*
 !backend/storage/results/.gitkeep
 !backend/storage/uploads/.gitkeep
+!backend/storage/batches/.gitkeep
