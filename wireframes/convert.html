@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>图片转换 - 线框（转换页）</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#222}
+    header{background:#0b74de;color:#fff;padding:12px 20px}
+    .wrap{display:grid;grid-template-columns:1fr 360px;gap:20px;max-width:1100px;margin:20px auto;padding:0 20px}
+    .upload-area{border:2px dashed #ccc;border-radius:8px;padding:20px;min-height:220px}
+    .file-list{margin-top:12px}
+    .file-item{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee}
+    .panel{background:#fafafa;border:1px solid #eee;padding:16px;border-radius:8px}
+    label{display:block;margin-top:8px;font-size:13px}
+    input[type=range]{width:100%}
+    .controls{margin-top:12px}
+    .queue{max-width:1100px;margin:16px auto;padding:0 20px}
+    .progress{height:10px;background:#eee;border-radius:6px;overflow:hidden}
+    .bar{height:100%;background:#0b74de;width:0%}
+    .btn{display:inline-block;padding:8px 12px;background:#0b74de;color:#fff;border-radius:6px;text-decoration:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div style="max-width:1100px;margin:0 auto;color:#fff;">转换 — 在线图片工具</div>
+  </header>
+
+  <div class="wrap">
+    <section>
+      <div class="upload-area panel">
+        <h3>上传区域（拖拽 / 点击）</h3>
+        <p>放置图片以添加到队列。</p>
+
+        <div class="file-list" id="fileList">
+          <div class="file-item">
+            <div>example.jpg — 3.2MB</div>
+            <div>待处理</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="panel">
+        <h4>转换队列</h4>
+        <div class="file-item">
+          <div>example.jpg</div>
+          <div>完成 <span style="color:#666">2.4MB</span></div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h3>设置</h3>
+        <label>目标格式
+          <select>
+            <option>webp</option>
+            <option>jpeg</option>
+            <option>png</option>
+            <option>gif</option>
+          </select>
+        </label>
+
+        <label>质量（示例）
+          <input type="range" min="10" max="100" value="80" />
+        </label>
+
+        <label>尺寸调整
+          <input type="text" placeholder="宽 x 高 或 50%" />
+        </label>
+
+        <label style="margin-top:8px"><input type="checkbox" /> 保留 EXIF</label>
+
+        <div class="controls">
+          <a class="btn" href="#">开始转换</a>
+          <a style="margin-left:8px" class="btn" href="#">清空队列</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="queue panel" style="max-width:1100px;">
+    <h4>任务进度</h4>
+    <div class="file-item" style="align-items:center">
+      <div style="flex:1">example.jpg</div>
+      <div style="width:320px">
+        <div class="progress"><div class="bar" style="width:72%"></div></div>
+      </div>
+      <div style="width:80px;text-align:right">72%</div>
+    </div>
+  </div>
+
+  <footer style="text-align:center;padding:24px;color:#666">低保真线框，仅展示布局与交互要点</footer>
+</body>
+</html>

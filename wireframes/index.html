@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>图片转换 - 线框（首页）</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#222}
+    header{background:#0b74de;color:#fff;padding:20px}
+    .container{padding:24px;max-width:1100px;margin:0 auto}
+    .hero{display:flex;gap:24px;align-items:center}
+    .upload-box{flex:1;border:2px dashed #ccc;padding:36px;text-align:center;border-radius:8px}
+    .features{width:360px}
+    .btn{display:inline-block;padding:10px 16px;background:#0b74de;color:#fff;border-radius:6px;text-decoration:none}
+    footer{padding:20px;text-align:center;color:#666}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>在线图片转换工具（线框）</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="upload-box">
+        <h2>拖拽或点击上传图片</h2>
+        <p>支持 JPEG / PNG / WebP / GIF（MVP）</p>
+        <p><a class="btn" href="convert.html">开始转换</a></p>
+      </div>
+      <aside class="features">
+        <h3>核心功能</h3>
+        <ul>
+          <li>单/批量转换</li>
+          <li>质量与尺寸设置</li>
+          <li>保留/删除 EXIF</li>
+          <li>批量 ZIP 下载</li>
+        </ul>
+        <h4>CTA</h4>
+        <p><a class="btn" href="convert.html">立即转换</a></p>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    Demo 低保真线框 — 打开 `wireframes/convert.html` 查看转换主页面布局
+  </footer>
+</body>
+</html>
