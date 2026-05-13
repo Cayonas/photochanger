@@ -321,6 +321,14 @@ input[type="range"] {
   background: rgba(20, 33, 27, 0.06);
 }
 
+.thumb-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 .item-copy {
   flex: 1;
   min-width: 0;

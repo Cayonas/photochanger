@@ -16,8 +16,8 @@ const isRunning = ref(false);
 const batchDownloadUrl = ref("");
 const batchSummary = ref(null);
 
-const acceptedTypes = "image/png,image/jpeg,image/webp,image/gif";
-const maxFilesHint = "支持 JPEG / PNG / WebP / GIF，单文件限制 50MB。";
+const acceptedTypes = ".png,.jpg,.jpeg,.webp,.gif,.heic,.heif,image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif";
+const maxFilesHint = "支持 JPEG / PNG / WebP / GIF / HEIC，单文件限制 50MB。";
 
 const completedCount = computed(() => queue.value.filter((item) => item.status === "completed").length);
 const failedCount = computed(() => queue.value.filter((item) => item.status === "failed").length);
@@ -50,6 +50,7 @@ function appendFiles(fileList) {
       filename: file.name,
       status: "queued",
       error: "",
+      previewable: supportsInlinePreview(file),
       originalMeta: `${file.name} · ${formatBytes(file.size)}`,
       resultMeta: "等待转换",
       outputSizeBytes: 0,
@@ -200,6 +201,11 @@ function formatBytes(size) {
   return `${(size / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+function supportsInlinePreview(file) {
+  const name = file.name.toLowerCase();
+  return !name.endsWith(".heic") && !name.endsWith(".heif");
+}
+
 onBeforeUnmount(() => {
   for (const item of queue.value) {
     URL.revokeObjectURL(item.localUrl);
@@ -243,6 +249,7 @@ onBeforeUnmount(() => {
           <div class="settings-header">
             <h2>转换设置</h2>
             <p>队列里的文件将复用同一组参数，便于批量处理。</p>
+            <p>HEIC 文件可直接上传并转换；受浏览器限制，原图预览可能会显示为占位状态。</p>
           </div>
 
           <div class="field-grid">
@@ -325,7 +332,13 @@ onBeforeUnmount(() => {
 
         <div class="queue-list">
           <article v-for="item in queue" :key="item.id" class="queue-item">
-            <img class="thumb" :src="item.resultUrl || item.localUrl" :alt="item.filename">
+            <img
+              v-if="item.resultUrl || item.previewable"
+              class="thumb"
+              :src="item.resultUrl || item.localUrl"
+              :alt="item.filename"
+            >
+            <div v-else class="thumb thumb-fallback">HEIC</div>
             <div class="item-copy">
               <div class="item-topline">
                 <h3>{{ item.filename }}</h3>

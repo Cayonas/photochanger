@@ -6,23 +6,38 @@ from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageOps, UnidentifiedImageError
+from pillow_heif import register_heif_opener
+
+register_heif_opener()
 
 MAX_FILE_SIZE = 50 * 1024 * 1024
-SUPPORTED_FORMATS = {"jpeg", "jpg", "png", "webp", "gif"}
+
+SUPPORTED_OUTPUT_FORMATS = {"jpeg", "jpg", "png", "webp", "gif"}
+SUPPORTED_UPLOAD_SUFFIXES = {"jpeg", "jpg", "png", "webp", "gif", "heic", "heif"}
+
 FORMAT_ALIASES = {
     "jpg": "jpeg",
+    "heif": "heic",
 }
+
 PILLOW_FORMATS = {
     "jpeg": "JPEG",
     "png": "PNG",
     "webp": "WEBP",
     "gif": "GIF",
 }
+
 CONTENT_TYPES = {
     "image/jpeg",
     "image/png",
     "image/webp",
     "image/gif",
+    "image/heic",
+    "image/heif",
+}
+
+GENERIC_BINARY_CONTENT_TYPES = {
+    "application/octet-stream",
 }
 
 
@@ -51,20 +66,27 @@ class ConversionResult:
 
 def _normalize_format(target_format: str) -> str:
     normalized = FORMAT_ALIASES.get(target_format.lower(), target_format.lower())
-    if normalized not in SUPPORTED_FORMATS:
-        raise ConversionError(f"暂不支持输出为 {target_format}。当前支持：JPEG、PNG、WebP、GIF。")
+    if normalized not in SUPPORTED_OUTPUT_FORMATS:
+        raise ConversionError(
+            f"暂不支持输出为 {target_format}。当前支持输出：JPEG、PNG、WebP、GIF。"
+        )
     return normalized
 
 
 def validate_upload(filename: str, content_type: str | None, payload_size: int) -> None:
     suffix = Path(filename).suffix.lower().lstrip(".")
-    normalized = FORMAT_ALIASES.get(suffix, suffix)
+    normalized_suffix = FORMAT_ALIASES.get(suffix, suffix)
+
     if payload_size > MAX_FILE_SIZE:
         raise ConversionError("文件超过 50MB 限制，请压缩后重试。")
-    if content_type and content_type not in CONTENT_TYPES:
-        raise ConversionError("文件 MIME 类型不受支持，请上传 JPEG、PNG、WebP 或 GIF。")
-    if normalized not in SUPPORTED_FORMATS:
-        raise ConversionError("文件格式不受支持，请上传 JPEG、PNG、WebP 或 GIF。")
+
+    if normalized_suffix not in SUPPORTED_UPLOAD_SUFFIXES:
+        raise ConversionError("文件格式不受支持，请上传 JPEG、PNG、WebP、GIF 或 HEIC。")
+
+    if content_type and content_type not in CONTENT_TYPES and content_type not in GENERIC_BINARY_CONTENT_TYPES:
+        raise ConversionError(
+            "文件 MIME 类型不受支持，请上传 JPEG、PNG、WebP、GIF 或 HEIC。"
+        )
 
 
 def convert_image(source_bytes: bytes, options: ConversionOptions) -> ConversionResult:
@@ -74,7 +96,7 @@ def convert_image(source_bytes: bytes, options: ConversionOptions) -> Conversion
         image = Image.open(BytesIO(source_bytes))
         image = ImageOps.exif_transpose(image)
     except UnidentifiedImageError as exc:
-        raise ConversionError("无法识别该图片文件，可能已损坏。") from exc
+        raise ConversionError("无法识别该图片文件，可能已损坏或编码不受支持。") from exc
 
     original_width, original_height = image.size
     output_image = image.copy()

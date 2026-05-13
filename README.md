@@ -1,49 +1,90 @@
 # PhotoChanger
 
-基于 `PRD.md` 实现的在线图片格式转换工具原型。
+基于 `FastAPI + Vue 3 + Pillow` 实现的在线图片格式转换系统。
 
-## 当前进度
+## 系统功能
 
-- 已完成：Sprint 1 + Sprint 2 的开发版
-  - Vue 前端工作台
-  - 单文件与多文件上传
-  - 输出格式、质量、尺寸、EXIF 设置
-  - 队列状态与总体进度
-  - 批量完成后 ZIP 下载
-- 未完成：Redis 队列、数据库、账户体系、Webhook、计费
+- 支持单文件上传与转换
+- 支持多文件队列上传与批量处理
+- 支持输出格式选择：`JPEG`、`PNG`、`WebP`、`GIF`
+- 支持上传格式：`JPEG`、`PNG`、`WebP`、`GIF`、`HEIC`
+- 支持压缩质量调整
+- 支持按宽度、高度进行尺寸调整
+- 支持 EXIF 元数据保留开关
+- 支持队列状态展示：等待中、处理中、已完成、失败
+- 支持总体进度展示
+- 支持单文件结果下载
+- 支持批量结果 ZIP 打包下载
+- 支持 HEIC 图片解码与转换到现有输出格式
 
-## 技术选型
+## 技术栈
 
-- 后端：FastAPI
+- 前端框架：Vue 3
+- 前端构建工具：Vite
+- 前端请求方式：Fetch API
+- 后端框架：FastAPI
+- 后端语言：Python 3
 - 图片处理：Pillow
-- 前端：Vue 3 + Vite
-- 存储：本地文件系统（开发环境）
+- HEIC 解码支持：pillow-heif
+- 文件存储：本地文件系统
+- 批量归档：Python `zipfile`
 
 ## 启动方式
 
-先构建前端：
+### 1. 安装后端依赖
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```
+
+如果还没有虚拟环境，可先执行：
+
+```powershell
+python -m venv .venv
+```
+
+### 2. 安装前端依赖
 
 ```powershell
 cd frontend
 npm install --cache .npm-cache
+```
+
+### 3. 构建前端
+
+```powershell
 npm run build
 ```
 
-再启动后端：
+### 4. 启动后端服务
 
 ```powershell
 cd ..
 .\.venv\Scripts\uvicorn.exe backend.app.main:app --reload
 ```
 
-访问 `http://127.0.0.1:8000`。
+启动后访问：
 
-前端开发模式：
+```text
+http://127.0.0.1:8000
+```
+
+## 前端开发模式
+
+如需单独调试前端页面，可运行：
 
 ```powershell
 cd frontend
 npm run dev
 ```
+
+默认开发地址：
+
+```text
+http://127.0.0.1:5173
+```
+
+Vite 已代理 `/api` 请求到本地 FastAPI 服务。
 
 ## 目录结构
 
@@ -51,11 +92,22 @@ npm run dev
 backend/
   app/
     main.py
-    services/converter.py
+    services/
+      converter.py
+  requirements.txt
   storage/
+    results/
+    batches/
+    uploads/
 frontend/
   src/
+    App.vue
+    main.js
+    styles.css
   dist/
+  package.json
+  vite.config.js
 docs/
   development-plan.md
+  system-implementation-overview.md
 ```
