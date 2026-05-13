@@ -1,62 +1,101 @@
 # PhotoChanger
 
-基于 `FastAPI + Vue 3 + Pillow` 实现的在线图片格式转换系统。
+基于 `FastAPI + Vue 3 + Pillow` 的在线图片格式转换工具，支持单图转换、批量处理、ZIP 打包下载，以及 HEIC/HEIF 图片导入。
 
-## 系统功能
+## 当前功能
 
-- 支持单文件上传与转换
-- 支持多文件队列上传与批量处理
-- 支持输出格式选择：`JPEG`、`PNG`、`WebP`、`GIF`
-- 支持上传格式：`JPEG`、`PNG`、`WebP`、`GIF`、`HEIC`
-- 支持压缩质量调整
-- 支持按宽度、高度进行尺寸调整
-- 支持 EXIF 元数据保留开关
-- 支持队列状态展示：等待中、处理中、已完成、失败
-- 支持总体进度展示
+- 支持上传格式：`JPEG`、`JPG`、`PNG`、`WebP`、`GIF`、`HEIC`、`HEIF`
+- 支持输出格式：`JPEG`、`PNG`、`WebP`、`GIF`
+- 支持质量调节
+- 支持按宽度或高度缩放
+- 支持保留 EXIF
+- 支持前端多文件队列与并发处理
 - 支持单文件结果下载
-- 支持批量结果 ZIP 打包下载
-- 支持 HEIC 图片解码与转换到现有输出格式
+- 支持批量结果打包为 ZIP 下载
+- 支持 HEIC/HEIF 解码与转换
+
+## 当前后端存储与限制
+
+这是当前系统最重要的运行约束，和之前版本不同：
+
+- 单文件转换结果不落盘，保存在后端内存中，并通过下载接口直接流式返回
+- 批量下载时才会生成 ZIP 文件，ZIP 临时存放在 `backend/storage/batches/`
+- 转换任务结果和批量 ZIP 都会在 30 分钟后过期
+- 后端每 60 秒执行一次清理任务，删除过期残留数据
+- 单文件上传大小限制为 `50MB`
+- 后端总转换并发上限为 `4`
+- 当并发已满时，接口会返回 `429 Too Many Requests`
 
 ## 技术栈
 
-- 前端框架：Vue 3
-- 前端构建工具：Vite
-- 前端请求方式：Fetch API
-- 后端框架：FastAPI
-- 后端语言：Python 3
+- 前端：Vue 3
+- 前端构建：Vite
+- 前端请求：Fetch API
+- 后端：FastAPI
 - 图片处理：Pillow
-- HEIC 解码支持：pillow-heif
-- 文件存储：本地文件系统
-- 批量归档：Python `zipfile`
+- HEIC 支持：pillow-heif
+- 批量打包：Python `zipfile`
 
-## 启动方式
+## 项目结构
 
-### 1. 安装后端依赖
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```text
+backend/
+  app/
+    main.py
+    services/
+      converter.py
+  requirements.txt
+  storage/
+    batches/
+    results/
+    uploads/
+frontend/
+  src/
+    App.vue
+    main.js
+    styles.css
+  dist/
+  package.json
+  vite.config.js
+docs/
+  development-plan.md
+  system-implementation-overview.md
 ```
 
-如果还没有虚拟环境，可先执行：
+说明：
+
+- `backend/storage/batches/`：批量下载生成的临时 ZIP 文件目录
+- `backend/storage/results/`：当前实现已不再使用，可视为历史目录
+- `backend/storage/uploads/`：当前实现未持久化保存原始上传文件
+
+## 本地启动
+
+### 1. 创建虚拟环境
 
 ```powershell
 python -m venv .venv
 ```
 
-### 2. 安装前端依赖
+### 2. 安装后端依赖
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```
+
+### 3. 安装前端依赖
 
 ```powershell
 cd frontend
 npm install --cache .npm-cache
 ```
 
-### 3. 构建前端
+### 4. 构建前端
 
 ```powershell
 npm run build
 ```
 
-### 4. 启动后端服务
+### 5. 启动后端服务
 
 ```powershell
 cd ..
@@ -71,43 +110,64 @@ http://127.0.0.1:8000
 
 ## 前端开发模式
 
-如需单独调试前端页面，可运行：
+如果只调试前端页面，可以运行：
 
 ```powershell
 cd frontend
 npm run dev
 ```
 
-默认开发地址：
+默认地址：
 
 ```text
 http://127.0.0.1:5173
 ```
 
-Vite 已代理 `/api` 请求到本地 FastAPI 服务。
+如果配置了 Vite 代理，前端开发环境可将 `/api` 请求转发到本地 FastAPI 服务。
 
-## 目录结构
+## 主要接口
 
-```text
-backend/
-  app/
-    main.py
-    services/
-      converter.py
-  requirements.txt
-  storage/
-    results/
-    batches/
-    uploads/
-frontend/
-  src/
-    App.vue
-    main.js
-    styles.css
-  dist/
-  package.json
-  vite.config.js
-docs/
-  development-plan.md
-  system-implementation-overview.md
-```
+### `GET /api/health`
+
+健康检查接口。
+
+### `POST /api/v1/convert`
+
+上传并转换单张图片。
+
+表单字段：
+
+- `file`
+- `target_format`
+- `quality`
+- `width`
+- `height`
+- `keep_exif`
+
+成功后返回任务信息和下载地址。
+
+### `GET /api/v1/tasks/{task_id}`
+
+获取单图转换任务状态。
+
+### `GET /api/v1/tasks/{task_id}/result`
+
+下载单图转换结果。结果由后端以内存流的方式返回，不落磁盘。
+
+### `POST /api/v1/batches`
+
+根据多个 `task_id` 生成 ZIP 批量下载包。
+
+### `GET /api/v1/batches/{batch_id}`
+
+获取批量打包任务状态。
+
+### `GET /api/v1/batches/{batch_id}/result`
+
+下载批量 ZIP 文件。
+
+## 目前的已知特点
+
+- 现在“单图不落盘”减少了磁盘占用，但结果会占用一段时间的内存
+- 由于有 50MB 文件限制和 4 个总并发限制，服务更偏向轻量图片转换场景
+- 如果后续需要进一步抗压，比较合适的方向是把结果文件迁移到对象存储，并把并发与 TTL 改为环境变量配置

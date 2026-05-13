@@ -10,3 +10,9 @@ backend/storage/batches/*
 !backend/storage/results/.gitkeep
 !backend/storage/uploads/.gitkeep
 !backend/storage/batches/.gitkeep
+PRD.md
+roadmap.md
+wireframes/*
+postman/
+.postman/*
+docs/*
